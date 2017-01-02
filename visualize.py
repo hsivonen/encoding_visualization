@@ -59,6 +59,11 @@ def check_duplicate(code_point, pointer, index):
         return " duplicate"
     return ""
 
+def check_duplicate_coverage(code_point, pointer, index):
+    if code_point in index[pointer+1:]:
+        return " duplicate"
+    return ""
+
 def check_compatibility(code_point):
     if code_point >= 0xF900 and code_point <= 0xFAFF:
         return " compatibility"
@@ -91,7 +96,42 @@ def format_index(name, row_length, lang):
         if pointer % row_length == 0:
             new_row = True
             row_num += 1
-    out_file.write("</table><p><a href='./' rel=contents>Back to the table of contents</a>")
+    out_file.write("</table><p><a href='%s-bmp.html'>BMP coverage</a><p><a href='./' rel=contents>Back to the table of contents</a>" % name)
+    out_file.close()
+
+def format_coverage(name, lang):
+    out_file = open("%s-bmp.html" % name, "w")
+    out_file.write(("<!DOCTYPE html><html lang=%s><meta charset=utf-8><title>BMP coverage of %s</title><link rel=stylesheet href=visualization.css type=text/css><h1>BMP coverage of %s</h1><table><thead><tr><td><td>") % (lang, name, name));
+    for i in range(0, 256):
+        out_file.write("<th>%02d" % i)
+    out_file.write("<tr><td><td>");
+    for i in range(0, 256):
+        out_file.write("<th>%02X" % i)
+    out_file.write("<tbody>");
+    previous = None
+    new_row = True
+    row_num = -1
+    index = indexes[name]
+    for code_point in range(0, 0x10000):
+        if code_point % 256 == 0:
+            new_row = True
+            row_num += 1
+        pointer = None
+        try:
+            pointer = index.index(code_point)
+        except ValueError:
+            pass
+        if new_row:
+            out_file.write("<tr><th>%02d<th>%02X" % (row_num, row_num))
+            new_row = False
+        if code_point >= 0xD800 and code_point <= 0xDFFF:
+            out_file.write("<td class=surrogate>")
+        elif not code_point in index:
+            out_file.write((u"<td class=unmapped title=U+%04X>\uFFFD" % code_point).encode("utf-8"))
+        else:
+            out_file.write((u"<td class='%s %s%s%s' title='U+%04X, %d = 0x%X'>%s" % ("contiguous" if previous and previous + 1 == pointer else "discontiguous", classify(code_point), check_duplicate_coverage(code_point, pointer, index), check_compatibility(code_point), code_point, pointer, pointer, unichr(code_point))).encode("utf-8"))
+        previous = pointer
+    out_file.write("</table><p><a href='%s.html'>Index</a><p><a href='./' rel=contents>Back to the table of contents</a>" % name)
     out_file.close()
 
 index_file = open("index.html", "w")
@@ -117,5 +157,13 @@ index_file.write("""<!DOCTYPE html><html lang=en><meta charset=utf-8><title>Enco
     <ul>""");
 for (name, row_length, lang) in names_lengths_langs:
     format_index(name, row_length, lang)
-    index_file.write("<li><a href=%s.html>%s</a>" % (name, name))
-index_file.write("</ul>");
+    format_coverage(name, lang)
+    index_file.write("<li><a href=%s.html>%s</a> (<a href=%s-bmp.html>BMP coverage</a>)" % (name, name, name))
+index_file.write('''</ul>
+<h2>Source Code</h2>
+<ul>
+<li><a href=visualize.py>Script for generating these HTML files</a>
+<li><a href="https://github.com/hsivonen/encoding_visualization">GitHub repo</a>
+</ul>
+<hr>
+<p><a href=/>Main page</a>''');

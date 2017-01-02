@@ -182,3 +182,7 @@ td:lang(zh-tw) {
 	border-style: dashed;
 	border-color: crimson;
 }
+
+.surrogate {
+	background-color: dimgrey;
+}
