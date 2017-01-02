@@ -12,6 +12,11 @@
  * (http://www.adobe.com/), with Reserved Font Name 'Source'. All Rights
  * Reserved. Source is a trademark of Adobe Systems Incorporated in the United
  * States and/or other countries.
+ *
+ * The fonts came from:
+ * https://github.com/adobe-fonts/source-sans-pro
+ * https://github.com/adobe-fonts/source-han-sans
+ * https://www.google.com/get/noto/
  */
 
 @font-face{
@@ -105,6 +110,11 @@ th, h1, h2 {
 
 th, td {
 	text-align: right;
+	border: 2px solid transparent;
+}
+
+li {
+	border: 2px solid transparent;
 }
 
 td:lang(ja) {
@@ -139,6 +149,10 @@ td:lang(zh-tw) {
 	background-color: whitesmoke;
 }
 
+.pua {
+	background-color: salmon;
+}
+
 .mid.contiguous {
 	background-color: limegreen;
 }
@@ -147,6 +161,24 @@ td:lang(zh-tw) {
 	background-color: lawngreen;
 }
 
+.pua.contiguous {
+	background-color: seagreen;
+}
+
 .astral.contiguous {
 	background-color: springgreen;
+}
+
+.duplicate {
+	border-color: crimson;
+}
+
+.compatibility {
+	border-style: dashed;
+	border-color: black;
+}
+
+.duplicate.compatibility {
+	border-style: dashed;
+	border-color: crimson;
 }
