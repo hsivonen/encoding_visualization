@@ -1,11 +1,11 @@
 Script for visualizing the holes in CJK indices.
 
-==Requirements==
+## Requirements
 
 Requires [https://github.com/whatwg/encoding](https://github.com/whatwg/encoding)
 to be checked out into an adjacent directory.
 
-==Licensing==
+## Licensing
 
 See `LICENSE-MPL.txt` for the license of the code original to this project.
 
