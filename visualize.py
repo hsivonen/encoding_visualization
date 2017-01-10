@@ -55,6 +55,8 @@ def classify(code_point):
     return "upper"
 
 def check_duplicate(code_point, pointer, index):
+    # Slow but the script doesn't need to be run often
+    # Don't post to http://accidentallyquadratic.tumblr.com/
     if code_point in index[:pointer]:
         return " duplicate"
     return ""
@@ -67,6 +69,8 @@ def check_duplicate_coverage(code_point, pointer, index):
 def check_compatibility(code_point):
     if code_point >= 0xF900 and code_point <= 0xFAFF:
         return " compatibility"
+    if code_point >= 0x3400 and code_point <= 0x4DB5:
+        return " ext"
     return ""
 
 def format_index(name, row_length, lang):
@@ -152,6 +156,7 @@ index_file.write("""<!DOCTYPE html><html lang=en><meta charset=utf-8><title>Enco
     <li class="astral contiguous">Four bytes in UTF-8, code point follows immediately the code point of previous pointer
     <li class=duplicate>Duplicate code point already mapped at an earlier index
     <li class=compatibility>CJK Compatibility Ideograph
+    <li class=ext>CJK Unified Ideographs Extension A
     </ul>
     <h2>The Indices</h2>
     <ul>""");

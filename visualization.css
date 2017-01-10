@@ -174,13 +174,23 @@ td:lang(zh-tw) {
 }
 
 .compatibility {
-	border-style: dashed;
-	border-color: black;
+    border-style: dashed;
+    border-color: black;
 }
 
 .duplicate.compatibility {
-	border-style: dashed;
-	border-color: crimson;
+    border-style: dashed;
+    border-color: crimson;
+}
+
+.ext {
+    border-style: dotted;
+    border-color: black;
+}
+
+.ext.compatibility {
+    border-style: dotted;
+    border-color: crimson;
 }
 
 .surrogate {
