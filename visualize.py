@@ -89,6 +89,8 @@ def format_index(name, row_length, lang):
     new_row = True
     pointer = 0
     row_num = 0
+    if name == "shift_jis":
+        name = "jis0208"
     index = indexes[name]
     already_seen = set()
     for code_point in index:
@@ -179,7 +181,11 @@ index_file.write("""<!DOCTYPE html><html lang=en><meta charset=utf-8><title>Enco
 for (name, row_length, lang) in names_lengths_langs:
     format_index(name, row_length, lang)
     format_coverage(name, lang)
-    index_file.write("<li><a href=%s.html>%s</a> (<a href=%s-bmp.html>BMP coverage</a>)" % (name, name, name))
+    if name == "jis0208":
+        format_index("shift_jis", 188, "ja")
+        index_file.write("<li><a href=%s.html>%s</a>, <a href=shift_jis.html>shift_jis</a> (<a href=%s-bmp.html>BMP coverage</a>)" % (name, name, name))
+    else:
+        index_file.write("<li><a href=%s.html>%s</a> (<a href=%s-bmp.html>BMP coverage</a>)" % (name, name, name))
 index_file.write('''</ul>
 <h2>Source Code</h2>
 <ul>
