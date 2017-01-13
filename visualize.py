@@ -43,6 +43,16 @@ names_lengths_langs = [
     ("big5", 157, "zh-tw"),
 ]
 
+big5_prefer_last = [
+  0x2550,
+  0x255E,
+  0x2561,
+  0x256A,
+  0x5341,
+  0x5345,
+]
+
+
 def classify(code_point):
     if code_point < 0x80:
         raise Error()
@@ -54,15 +64,8 @@ def classify(code_point):
         return "pua"
     return "upper"
 
-def check_duplicate(code_point, pointer, index):
-    # Slow but the script doesn't need to be run often
-    # Don't post to http://accidentallyquadratic.tumblr.com/
-    if code_point in index[:pointer]:
-        return " duplicate"
-    return ""
-
-def check_duplicate_coverage(code_point, pointer, index):
-    if code_point in index[pointer+1:]:
+def check_duplicate(code_point, pointer, already_seen):
+    if code_point in already_seen:
         return " duplicate"
     return ""
 
@@ -87,6 +90,7 @@ def format_index(name, row_length, lang):
     pointer = 0
     row_num = 0
     index = indexes[name]
+    already_seen = set()
     for code_point in index:
         if new_row:
             out_file.write("<tr><th>%02d<th>%02X" % (row_num, row_num))
@@ -94,8 +98,9 @@ def format_index(name, row_length, lang):
         if not code_point:
             out_file.write((u"<td class=unmapped title='%d = 0x%X'>\uFFFD" % (pointer, pointer)).encode("utf-8"))
         else:
-            out_file.write((u"<td class='%s %s%s%s' title='U+%04X, %d = 0x%X'>%s" % ("contiguous" if previous and previous + 1 == code_point else "discontiguous", classify(code_point), check_duplicate(code_point, pointer, index), check_compatibility(code_point), code_point, pointer, pointer, unichr(code_point))).encode("utf-8"))
+            out_file.write((u"<td class='%s %s%s%s' title='U+%04X, %d = 0x%X'>%s" % ("contiguous" if previous and previous + 1 == code_point else "discontiguous", classify(code_point), check_duplicate(code_point, pointer, already_seen), check_compatibility(code_point), code_point, pointer, pointer, unichr(code_point))).encode("utf-8"))
         previous = code_point
+        already_seen.add(code_point)
         pointer += 1
         if pointer % row_length == 0:
             new_row = True
@@ -116,14 +121,25 @@ def format_coverage(name, lang):
     new_row = True
     row_num = -1
     index = indexes[name]
+    duplicates = set()
+    reverse_index = {}
+    for i in xrange(len(index)):
+        code_point = index[i]
+        if code_point:
+            if code_point in reverse_index:
+                duplicates.add(code_point)
+                if name == "big5" and code_point in big5_prefer_last:
+                    reverse_index[code_point] = i
+            else:
+                reverse_index[code_point] = i
     for code_point in range(0, 0x10000):
         if code_point % 256 == 0:
             new_row = True
             row_num += 1
         pointer = None
         try:
-            pointer = index.index(code_point)
-        except ValueError:
+            pointer = reverse_index[code_point]
+        except KeyError:
             pass
         if new_row:
             out_file.write("<tr><th>%02d<th>%02X" % (row_num, row_num))
@@ -133,7 +149,7 @@ def format_coverage(name, lang):
         elif not code_point in index:
             out_file.write((u"<td class=unmapped title=U+%04X>\uFFFD" % code_point).encode("utf-8"))
         else:
-            out_file.write((u"<td class='%s %s%s%s' title='U+%04X, %d = 0x%X'>%s" % ("contiguous" if previous and previous + 1 == pointer else "discontiguous", classify(code_point), check_duplicate_coverage(code_point, pointer, index), check_compatibility(code_point), code_point, pointer, pointer, unichr(code_point))).encode("utf-8"))
+            out_file.write((u"<td class='%s %s%s%s' title='U+%04X, %d = 0x%X'>%s" % ("contiguous" if previous and previous + 1 == pointer else "discontiguous", classify(code_point), check_duplicate(code_point, pointer, duplicates), check_compatibility(code_point), code_point, pointer, pointer, unichr(code_point))).encode("utf-8"))
         previous = pointer
     out_file.write("</table><p><a href='%s.html'>Index</a><p><a href='./' rel=contents>Back to the table of contents</a>" % name)
     out_file.close()
